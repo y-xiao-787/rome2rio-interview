@@ -1,0 +1,27 @@
+name: 'rome2rio_interview'
+version: '1.0.0'
+
+profile: 'rome2rio_interview'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  rome2rio_interview:
+    staging:
+      +materialized: view
+      +schema: staging
+    curation:
+      +materialized: table
+      +schema: curation
+    marts:
+      +materialized: view
+      +schema: mart

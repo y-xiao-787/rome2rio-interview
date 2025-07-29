@@ -1,0 +1,12 @@
+rome2rio_interview:
+  outputs:
+    dev:
+      type: duckdb
+      path: data/rome2rio_target.duckdb
+      schema: dbt_default
+      threads: 4
+      attach:
+        - path: data/rome2rio_source.duckdb
+          type: duckdb
+          alias: rome2rio_db
+  target: dev
