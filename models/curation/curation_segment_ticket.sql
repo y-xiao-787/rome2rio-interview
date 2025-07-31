@@ -119,9 +119,9 @@ segment_ticket_base as (
         , tkp.miles_earned
 
     from stg_gds__booking bk
-        inner join stg_gds__ticket tk on bk.booking_id = tk.booking_id
-        inner join stg_gds__ticket_segment tks on tk.ticket_id = tks.ticket_id
-        inner join stg_gds__segment sg on tks.segment_id = sg.segment_id
+        left join stg_gds__ticket tk on bk.booking_id = tk.booking_id
+        left join stg_gds__ticket_segment tks on tk.ticket_id = tks.ticket_id
+        left join stg_gds__segment sg on tks.segment_id = sg.segment_id
         left join stg_gds__ticket_passenger tkp on tk.ticket_id = tkp.ticket_id
 ),
 
