@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: gds
+    database: rome2rio_db
+    schema: main  
+    tables:
+      - name: booking
+      - name: segment
+      - name: passenger
+      - name: ticket
+      - name: ticket_segment
+      - name: ticket_passenger

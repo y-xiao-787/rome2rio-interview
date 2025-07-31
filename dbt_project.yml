@@ -25,3 +25,7 @@ models:
     marts:
       +materialized: view
       +schema: mart
+
+snapshots:
+  rome2rio_interview:
+    +schema: snapshot

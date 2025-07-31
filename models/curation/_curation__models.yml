@@ -1,0 +1,194 @@
+version: 2
+
+models:
+  - name: curation_segment_ticket
+    description: >
+      Curated booking table combining ticket and segment data at the ticket-segment grain.
+      This table provides comprehensive booking, ticketing, and operational data for 
+      analytics and reporting. Each row represents one ticket applied to one segment.
+    
+    config:
+      contract:
+        enforced: false
+      
+    columns:
+      - name: dw_booking_id
+        description: Surrogate key combining ticket_id and segment_id
+        data_type: varchar
+        constraints:
+          - type: not_null
+          - type: unique
+          
+      - name: booking_id
+        description: Natural key for the original booking transaction
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - relationships:
+              to: ref('stg_gds__booking')
+              field: booking_id
+              
+      - name: passenger_id
+        description: Identifier for the passenger on the booking
+        data_type: varchar
+        data_tests:
+          - not_null
+          
+      - name: ticket_id
+        description: Natural key for the ticket
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - relationships:
+              to: ref('stg_gds__ticket')
+              field: ticket_id
+              
+      - name: segment_id
+        description: Natural key for the travel segment (flight leg)
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - relationships:
+              to: ref('stg_gds__segment')
+              field: segment_id
+              
+      - name: ticket_number
+        description: Airline ticket number (e-ticket number)
+        data_type: varchar
+          
+      - name: flight_number
+        description: Airline flight number for this segment
+        data_type: varchar
+
+      - name: booking_date
+        description: Date when the booking was made
+        data_type: date
+        constraints:
+          - type: not_null
+              
+      - name: issue_date
+        description: "Date when the ticket was issued"
+        data_type: date
+        data_tests:
+          - not_null
+          
+      - name: departure_date
+        description: "Scheduled departure date for this segment"
+        data_type: date
+
+      - name: departure_city
+        description: "Origin city for this travel segment"
+        data_type: varchar
+              
+      - name: arrival_city
+        description: "Destination city for this travel segment"
+        data_type: varchar
+      
+      - name: base_price
+        description: "Base fare amount before taxes and fees"
+        data_type: numeric
+        data_tests:
+          - not_null
+              
+      - name: taxes
+        description: Tax amount for this ticket-segment allocation
+        data_type: numeric
+              
+      - name: fees
+        description: Additional fees for this ticket-segment allocation
+        data_type: numeric
+              
+      - name: total_price
+        description: Total price (base_price + taxes + fees)
+        data_type: numeric
+        constraints:
+          - type: not_null
+
+      - name: airline
+        description: Operating airline for this segment
+        data_type: varchar
+              
+      - name: aircraft
+        description: Aircraft type operating this segment
+        data_type: varchar
+              
+      - name: fare_class
+        description: Fare class/cabin type for this ticket
+        data_type: varchar
+        data_tests:
+          - accepted_values:
+              values: ['Economy', 'Premium Economy', 'Business', 'First']
+              
+      - name: duration_minutes
+        description: Scheduled flight duration in minutes
+        data_type: integer
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: is_refundable
+        description: Whether this ticket is refundable
+        data_type: boolean
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              
+      - name: is_changeable
+        description: Whether this ticket allows changes
+        data_type: boolean
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              
+      - name: is_primary
+        description: Whether this passenger is the primary booker
+        data_type: boolean
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              
+      - name: has_special_requests
+        description: Whether this passenger has special requests
+        data_type: boolean
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+
+      - name: pax_per_booking
+        description: Number of passengers in this booking
+        data_type: bigint
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 1
+              
+      - name: tickets_per_booking
+        description: Number of tickets in this booking
+        data_type: bigint
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 1
+              
+      - name: segments_per_ticket
+        description: Number of segments covered by this ticket
+        data_type: bigint
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 1
+              
+      - name: booking_to_departure_days
+        description: Days between booking and departure
+        data_type: bigint
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: -1  # Allow same-day or last-minute changes
+              max_value: 365
+              
+      - name: booking_window_category
+        description: Categorised booking advance window
+        data_type: varchar
+        data_tests:
+          - accepted_values:
+              values: ['Last Minute', 'Short Notice', 'Standard', 'Advance']
