@@ -30,6 +30,67 @@ pip install -r requirements.txt
 ### View data in DuckDB UI
 `duckdb data/rome2rio_target.duckdb -ui -readonly`
 
+### Airflow DAG
+
+```python
+from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.operators.bash import BashOperator
+
+default_args = {
+    'owner': 'rome2rio-analytics',
+    'depends_on_past': False,
+    'start_date': datetime(2025, 8, 1),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+    'schedule_interval': '0 9 * * *',
+}
+
+dag = DAG(
+    'dbt_pipeline',
+    default_args=default_args,
+    description='Run dbt models using BashOperator',
+    catchup=False,
+    tags=['dbt', 'analytics'],
+)
+
+dbt_deps_task = BashOperator(
+    task_id='dbt_deps',
+    bash_command='dbt deps --project-dir /path/to/dbt/project',
+    dag=dag,
+)
+
+dbt_seed_task = BashOperator(
+    task_id='dbt_seed',
+    bash_command='dbt seed --project-dir /path/to/dbt/project',
+    dag=dag,
+)
+
+dbt_run_task = BashOperator(
+    task_id='dbt_run',
+    bash_command='dbt run --profiles-dir profiles',
+    env={'DBT_PROJECT_DIR': '/path/to/dbt/project'},
+    dag=dag,
+)
+
+dbt_test_task = BashOperator(
+    task_id='dbt_test',
+    bash_command='dbt test --profiles-dir profiles',
+    env={'DBT_PROJECT_DIR': '/path/to/dbt/project'},
+    dag=dag,
+)
+
+dbt_docs_task = BashOperator(
+    task_id='dbt_docs_generate',
+    bash_command='dbt docs generate --project-dir /path/to/dbt/project --profiles-dir profiles',
+    dag=dag,
+)
+
+dbt_deps_task >> dbt_seed_task >> dbt_run_task >> dbt_test_task >> dbt_docs_task
+```
+
 ## Part 2: Code Review – Mentoring a Junior Engineer
 
 Feedback:
