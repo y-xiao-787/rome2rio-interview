@@ -1,7 +1,5 @@
 Welcome to Rome2Rio - Lead Analytics Engineer Take-Home Case Study
 
-Author: Yuhuan Xiao
-
 ## Part 1: Build the Solution - Data Pipeline
 
 ### Requirements
